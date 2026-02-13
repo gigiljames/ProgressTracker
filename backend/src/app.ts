@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter';
+import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
 dotenv.config();
 
 const app = express();
@@ -19,6 +20,9 @@ app.use(cookieParser());
 
 // Routes
 app.use('/', userRouter);
+
+// Error handler middleware
+app.use(errorHandlerMiddleware);
 
 // Server
 app.listen(process.env.PORT, () => {
