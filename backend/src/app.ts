@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
+import mongoose from 'mongoose';
 dotenv.config();
 
 const app = express();
@@ -26,5 +27,11 @@ app.use(errorHandlerMiddleware);
 
 // Server
 app.listen(process.env.PORT, () => {
+  const mongoUrl = process.env.MONGODB_URL;
+  if (!mongoUrl) {
+    throw new Error('MongoDB URL not found.');
+  }
+  mongoose.connect(mongoUrl);
+  console.log('MongoDB connected.');
   console.log(`Listening at port - ${process.env.PORT}`);
 });

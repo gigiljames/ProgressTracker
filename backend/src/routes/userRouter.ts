@@ -3,6 +3,9 @@ import { ROUTES } from '../constants/routes';
 
 const userRouter = Router();
 
-userRouter.get(ROUTES.AUTH.LOGIN, (req, res) => {});
+userRouter.post(ROUTES.AUTH.LOGIN, (req, res) => {
+  console.log('Login');
+  console.log(req.body);
+});
 
 export default userRouter;
