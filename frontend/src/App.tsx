@@ -1,22 +1,20 @@
-import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router'
-import { Toaster } from 'react-hot-toast'
-import AdminRoute from './routes/AdminRoute'
-import UserRoute from './routes/UserRoute'
+import { BrowserRouter, Route, Routes } from "react-router";
+import { Toaster } from "react-hot-toast";
+import AdminRoute from "./routes/AdminRoute";
+import UserRoute from "./routes/UserRoute";
 
 function App() {
-
   return (
     <>
-      <Toaster/>
+      <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/*" element={<UserRoute/>}/>
-          <Route path="/admin/*" element={<AdminRoute/>}/>
+          <Route path="/*" element={<UserRoute />} />
+          <Route path="/admin/*" element={<AdminRoute />} />
         </Routes>
       </BrowserRouter>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
