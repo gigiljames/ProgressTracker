@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import { IoSearch } from "react-icons/io5";
 import { Link } from "react-router";
 import { FaBook } from "react-icons/fa";
+import AddTextbookModal from "../components/AddTextbookModal";
 
 export const books = [
   {
@@ -46,6 +47,7 @@ export const books = [
 
 function TextbooksPage() {
   const [filter, setFilter] = useState("all");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   return (
     <>
       <Navbar />
@@ -63,7 +65,10 @@ function TextbooksPage() {
                 <IoSearch />
               </span>
             </div>
-            <button className="bg-neutral-500 rounded-full flex justify-center items-center px-4 text-lg">
+            <button
+              className="bg-neutral-500 rounded-full flex justify-center items-center px-4 text-lg"
+              onClick={() => setIsAddModalOpen(true)}
+            >
               Add book
             </button>
           </div>
@@ -144,6 +149,10 @@ function TextbooksPage() {
             </>
           ))}
         </div>
+        <AddTextbookModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+        />
       </div>
     </>
   );

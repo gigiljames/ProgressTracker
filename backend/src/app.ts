@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
 import mongoose from 'mongoose';
+import { loggerMiddleware } from './middlewares/loggerMiddleware';
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(loggerMiddleware);
 
 // Routes
 app.use('/', userRouter);
