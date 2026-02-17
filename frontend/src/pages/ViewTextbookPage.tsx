@@ -24,7 +24,7 @@ const initialBook = {
   title: "Human Anatomy",
   description:
     "Detailed exploration of structural anatomy with clinical relevance for medical students.",
-  color: "#3B82F6",
+  color: "#987aaa",
   totalTopics: 8,
   completedTopics: 3,
   createdAt: "2026-02-01T10:00:00.000Z",
@@ -154,70 +154,6 @@ const initialBook = {
   ],
 };
 
-// Helper component to wrap placeholder modals and simulate submit
-const ModalWrapper = ({
-  children,
-  isOpen,
-  onClose,
-  onSubmit,
-  title,
-}: {
-  children: React.ReactNode;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  title: string;
-}) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="relative bg-neutral-900 border border-neutral-700 p-6 rounded-lg min-w-[400px]">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white"
-        >
-          <IoClose />
-        </button>
-        <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
-        <div className="mb-6 text-neutral-300">
-          {/* Render the placeholder modal content */}
-          {children}
-          <p className="mt-2 text-sm text-neutral-500 italic">
-            (Placeholder Component)
-          </p>
-        </div>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onSubmit}
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500"
-          >
-            Simulate Submit
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Simple Close Icon for ModalWrapper
-const IoClose = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 512 512"
-    fill="currentColor"
-  >
-    <path d="M289.94 256l111-111c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-111-111c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l111 111-111 111c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l111-111 111 111c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-111-111z" />
-  </svg>
-);
-
 function ViewTextbookPage() {
   const [bookData, setBookData] = useState(initialBook);
   const [editBookModal, setEditBookModal] = useState(false);
@@ -273,7 +209,70 @@ function ViewTextbookPage() {
     setExpandedChapters(new Set(allChapIds));
   };
 
-  // Mock Data Updates
+  const handleConfirmDelete = () => {
+    if (!confirmModal.type || !confirmModal.ids) return;
+    const { type, ids } = confirmModal;
+
+    const newBookData = JSON.parse(JSON.stringify(bookData));
+    if (type === "SECTION" && ids.secId) {
+      newBookData.sections = newBookData.sections.filter(
+        (s: any) => s._id !== ids.secId,
+      );
+    } else if (type === "CHAPTER" && ids.secId && ids.chapId) {
+      const section = newBookData.sections.find(
+        (s: any) => s._id === ids.secId,
+      );
+      if (section) {
+        section.chapters = section.chapters.filter(
+          (c: any) => c._id !== ids.chapId,
+        );
+      }
+    } else if (type === "TOPIC" && ids.secId && ids.chapId && ids.topId) {
+      const section = newBookData.sections.find(
+        (s: any) => s._id === ids.secId,
+      );
+      const chapter = section?.chapters.find((c: any) => c._id === ids.chapId);
+      if (chapter) {
+        chapter.topics = chapter.topics.filter((t: any) => t._id !== ids.topId);
+        chapter.totalTopics--;
+      }
+    }
+    setBookData(newBookData);
+  };
+
+  const handleDelete = (
+    type: "SECTION" | "CHAPTER" | "TOPIC",
+    secId: string,
+    chapId?: string,
+    topId?: string,
+  ) => {
+    setConfirmModal({
+      isOpen: true,
+      type,
+      ids: { secId, chapId, topId },
+    });
+  };
+
+  const toggleTopicCompletion = (
+    secId: string,
+    chapId: string,
+    topId: string,
+  ) => {
+    const newBookData = JSON.parse(JSON.stringify(bookData));
+    const section = newBookData.sections.find((s: any) => s._id === secId);
+    const chapter = section?.chapters.find((c: any) => c._id === chapId);
+    const topic = chapter?.topics.find((t: any) => t._id === topId);
+
+    if (topic) {
+      topic.isCompleted = !topic.isCompleted;
+      // Update counts
+      chapter.completedTopics = topic.isCompleted
+        ? chapter.completedTopics + 1
+        : chapter.completedTopics - 1;
+    }
+    setBookData(newBookData);
+  };
+
   const handleModalSubmit = () => {
     if (!activeModal.type) return;
 
@@ -351,70 +350,6 @@ function ViewTextbookPage() {
     setActiveModal({ type: null });
   };
 
-  const handleConfirmDelete = () => {
-    if (!confirmModal.type || !confirmModal.ids) return;
-    const { type, ids } = confirmModal;
-
-    const newBookData = JSON.parse(JSON.stringify(bookData));
-    if (type === "SECTION" && ids.secId) {
-      newBookData.sections = newBookData.sections.filter(
-        (s: any) => s._id !== ids.secId,
-      );
-    } else if (type === "CHAPTER" && ids.secId && ids.chapId) {
-      const section = newBookData.sections.find(
-        (s: any) => s._id === ids.secId,
-      );
-      if (section) {
-        section.chapters = section.chapters.filter(
-          (c: any) => c._id !== ids.chapId,
-        );
-      }
-    } else if (type === "TOPIC" && ids.secId && ids.chapId && ids.topId) {
-      const section = newBookData.sections.find(
-        (s: any) => s._id === ids.secId,
-      );
-      const chapter = section?.chapters.find((c: any) => c._id === ids.chapId);
-      if (chapter) {
-        chapter.topics = chapter.topics.filter((t: any) => t._id !== ids.topId);
-        chapter.totalTopics--;
-      }
-    }
-    setBookData(newBookData);
-  };
-
-  const handleDelete = (
-    type: "SECTION" | "CHAPTER" | "TOPIC",
-    secId: string,
-    chapId?: string,
-    topId?: string,
-  ) => {
-    setConfirmModal({
-      isOpen: true,
-      type,
-      ids: { secId, chapId, topId },
-    });
-  };
-
-  const toggleTopicCompletion = (
-    secId: string,
-    chapId: string,
-    topId: string,
-  ) => {
-    const newBookData = JSON.parse(JSON.stringify(bookData));
-    const section = newBookData.sections.find((s: any) => s._id === secId);
-    const chapter = section?.chapters.find((c: any) => c._id === chapId);
-    const topic = chapter?.topics.find((t: any) => t._id === topId);
-
-    if (topic) {
-      topic.isCompleted = !topic.isCompleted;
-      // Update counts
-      chapter.completedTopics = topic.isCompleted
-        ? chapter.completedTopics + 1
-        : chapter.completedTopics - 1;
-    }
-    setBookData(newBookData);
-  };
-
   // Progress Calculation Helper
   const calculateProgress = (completed: number, total: number) => {
     if (total === 0) return 0;
@@ -453,12 +388,11 @@ function ViewTextbookPage() {
 
         {/* Content Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl text-neutral-200 font-bold">
-            Course Content
-          </h2>
+          <h2 className="text-3xl text-neutral-200 font-bold">Sections</h2>
           <button
             onClick={expandAll}
-            className="text-blue-500 hover:text-blue-400 font-medium"
+            style={{ color: bookData.color }}
+            className=" hover:underline font-medium"
           >
             Expand All
           </button>
@@ -666,9 +600,14 @@ function ViewTextbookPage() {
                                           topic._id,
                                         )
                                       }
+                                      style={{
+                                        backgroundColor: topic.isCompleted
+                                          ? bookData.color
+                                          : "transparent",
+                                      }}
                                       className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
                                         topic.isCompleted
-                                          ? "bg-emerald-600 border-emerald-600"
+                                          ? `border-[${bookData.color}]`
                                           : "border-neutral-600 hover:border-neutral-400"
                                       }`}
                                     >
@@ -733,78 +672,64 @@ function ViewTextbookPage() {
             );
           })}
         </div>
-
-        {/* Modals */}
-        <EditTextbookModal
-          isOpen={editBookModal}
-          onClose={() => setEditBookModal(false)}
-        />
-
-        <ConfirmationModal
-          isOpen={confirmModal.isOpen}
-          onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-          onConfirm={handleConfirmDelete}
-          title={`Delete ${confirmModal.type ? confirmModal.type.charAt(0) + confirmModal.type.slice(1).toLowerCase() : "Item"}`}
-          message="Are you sure you want to delete this item? This action cannot be undone."
-          confirmText="Delete"
-          isDangerous={true}
-        />
-
-        {/* Simulated Modals */}
-        <ModalWrapper
-          isOpen={activeModal.type === "ADD_SECTION"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Add Section"
-        >
-          <AddSectionModal />
-        </ModalWrapper>
-
-        <ModalWrapper
-          isOpen={activeModal.type === "EDIT_SECTION"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Edit Section"
-        >
-          <EditSectionModal />
-        </ModalWrapper>
-
-        <ModalWrapper
-          isOpen={activeModal.type === "ADD_CHAPTER"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Add Chapter"
-        >
-          <AddChapterModal />
-        </ModalWrapper>
-
-        <ModalWrapper
-          isOpen={activeModal.type === "EDIT_CHAPTER"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Edit Chapter"
-        >
-          <EditChapterModal />
-        </ModalWrapper>
-
-        <ModalWrapper
-          isOpen={activeModal.type === "ADD_TOPIC"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Add Topic"
-        >
-          <AddTopicModal />
-        </ModalWrapper>
-
-        <ModalWrapper
-          isOpen={activeModal.type === "EDIT_TOPIC"}
-          onClose={() => setActiveModal({ type: null })}
-          onSubmit={handleModalSubmit}
-          title="Edit Topic"
-        >
-          <EditTopicModal />
-        </ModalWrapper>
       </div>
+      {/* Modals */}
+      <EditTextbookModal
+        isOpen={editBookModal}
+        onClose={() => setEditBookModal(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${confirmModal.type ? confirmModal.type.charAt(0) + confirmModal.type.slice(1).toLowerCase() : "Item"}`}
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+        isDangerous={true}
+      />
+
+      <AddSectionModal
+        isOpen={activeModal.type === "ADD_SECTION"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+      />
+
+      <EditSectionModal
+        isOpen={activeModal.type === "EDIT_SECTION"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+        initialTitle=""
+        initialDescription=""
+      />
+
+      <AddChapterModal
+        isOpen={activeModal.type === "ADD_CHAPTER"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+      />
+
+      <EditChapterModal
+        isOpen={activeModal.type === "EDIT_CHAPTER"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+        initialTitle=""
+        initialDescription=""
+      />
+
+      <AddTopicModal
+        isOpen={activeModal.type === "ADD_TOPIC"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+      />
+
+      <EditTopicModal
+        isOpen={activeModal.type === "EDIT_TOPIC"}
+        onClose={() => setActiveModal({ type: null })}
+        onSubmit={handleModalSubmit}
+        initialTitle=""
+        initialDescription=""
+      />
     </>
   );
 }

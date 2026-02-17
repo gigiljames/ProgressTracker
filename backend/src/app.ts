@@ -6,6 +6,12 @@ import userRouter from './routes/userRouter';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
 import mongoose from 'mongoose';
 import { loggerMiddleware } from './middlewares/loggerMiddleware';
+import bookRouter from './routes/bookRouter';
+import chapterRouter from './routes/chapterRouter';
+import examRouter from './routes/examRouter';
+import sectionRouter from './routes/sectionRouter';
+import slotRouter from './routes/slotRouter';
+import topicRouter from './routes/topicRouter';
 dotenv.config();
 
 const app = express();
@@ -23,6 +29,12 @@ app.use(loggerMiddleware);
 
 // Routes
 app.use('/', userRouter);
+app.use('/', bookRouter);
+app.use('/', chapterRouter);
+app.use('/', examRouter);
+app.use('/', sectionRouter);
+app.use('/', slotRouter);
+app.use('/', topicRouter);
 
 // Error handler middleware
 app.use(errorHandlerMiddleware);

@@ -35,4 +35,4 @@ const examSchema = new Schema<IExam>(
 
 examSchema.index({ userId: 1, examDate: 1 });
 
-export const Exam = model<IExam>('Exam', examSchema);
+export const ExamModel = model<IExam>('Exam', examSchema);

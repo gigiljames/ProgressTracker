@@ -43,4 +43,4 @@ const sectionSchema = new Schema<ISection>(
   { timestamps: true },
 );
 
-export const Section = model<ISection>('Section', sectionSchema);
+export const SectionModel = model<ISection>('Section', sectionSchema);

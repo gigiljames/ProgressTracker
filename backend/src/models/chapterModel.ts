@@ -49,4 +49,4 @@ const chapterSchema = new Schema<IChapter>(
   { timestamps: true },
 );
 
-export const Chapter = model<IChapter>('Chapter', chapterSchema);
+export const ChapterModel = model<IChapter>('Chapter', chapterSchema);

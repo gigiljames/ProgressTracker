@@ -24,7 +24,7 @@ function ConfirmationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
       <div className="relative bg-neutral-900 border border-neutral-700 p-6 rounded-xl w-full max-w-md shadow-2xl transform transition-all scale-100 opacity-100">
         <button
           onClick={onClose}

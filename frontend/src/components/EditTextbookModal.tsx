@@ -54,8 +54,8 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
   return (
     <>
       {isOpen && (
-        <div className="w-screen h-screen fixed inset-0 flex justify-center items-center bg-black/50 z-50">
-          <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 p-6 rounded-lg relative min-w-[500px] max-w-lg">
+        <div className="w-screen h-screen fixed inset-0 flex justify-center bg-black/50 z-50">
+          <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 p-6 rounded-lg relative min-w-100 max-w-lg mt-15">
             <button
               className="absolute right-4 top-4 text-2xl text-neutral-300 hover:bg-neutral-700/75 p-1 rounded-md cursor-pointer"
               onClick={onClose}
@@ -136,7 +136,7 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
                   <span className="text-neutral-500 text-sm">(Optional)</span>
                 </label>
                 <textarea
-                  className={`border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-[120px] focus:outline-none focus:border-neutral-600`}
+                  className={`border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-30 focus:outline-none focus:border-neutral-600`}
                   placeholder="Enter description"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
@@ -147,7 +147,7 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
                 className="mt-2 w-full p-3 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 font-medium transition-colors active:bg-neutral-600"
                 onClick={handleSubmit}
               >
-                Update Textbook
+                Save Changes
               </button>
             </div>
           </div>

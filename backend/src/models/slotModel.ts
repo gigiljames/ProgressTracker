@@ -90,4 +90,4 @@ const dailySlotSchema = new Schema<IDailySlot>(
 
 dailySlotSchema.index({ userId: 1, date: 1, startTime: 1 });
 
-export const DailySlot = model<IDailySlot>('DailySlot', dailySlotSchema);
+export const DailySlotModel = model<IDailySlot>('DailySlot', dailySlotSchema);

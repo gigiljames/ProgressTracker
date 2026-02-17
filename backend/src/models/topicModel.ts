@@ -55,4 +55,4 @@ const topicSchema = new Schema<ITopic>(
   { timestamps: true },
 );
 
-export const Topic = model<ITopic>('Topic', topicSchema);
+export const TopicModel = model<ITopic>('Topic', topicSchema);
