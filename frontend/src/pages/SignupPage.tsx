@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { sendOtp, signup } from "../api/userAuthService";
+import toast from "react-hot-toast";
+import OtpModal from "../components/OtpModal";
 
 function SignupPage() {
   const [fName, setFName] = useState("");
@@ -7,11 +10,55 @@ function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const [otpModal, setOtpModal] = useState(false);
+  const [otpModalLoading, setOtpModalLoading] = useState(false);
 
-  function handleSignup() {}
+  function resetFormStates() {
+    setFName("");
+    setLName("");
+    setEmail("");
+    setPassword("");
+    setRePassword("");
+  }
+
+  function handleSignup() {
+    sendOtp(fName, lName, email).then((response) => {
+      if (response.data.success) {
+        toast.success("OTP sent successfully.");
+        setOtpModal(true);
+      } else {
+        toast.error(response.data.message);
+      }
+    });
+  }
+
+  function handleOtpSubmit(otp: string) {
+    setOtpModalLoading(true);
+    signup(fName, lName, email, password, otp)
+      .then((response) => {
+        if (response.data.success) {
+          toast.success(response.data.message);
+          resetFormStates();
+          setOtpModalLoading(false);
+          setOtpModal(false);
+        } else {
+          toast.error(response.data.message);
+        }
+      })
+      .catch((e) => {
+        toast.error("An error has occured.");
+      });
+  }
 
   return (
     <>
+      <OtpModal
+        isOpen={otpModal}
+        onClose={() => setOtpModal(false)}
+        email={email}
+        onSubmit={handleOtpSubmit}
+        isLoading={otpModalLoading}
+      />
       <div className="h-screen w-screen bg-neutral-950 flex justify-center pt-20">
         <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 px-8 py-10 rounded-lg">
           <h1 className="text-neutral-300 text-center text-2xl font-extrabold">

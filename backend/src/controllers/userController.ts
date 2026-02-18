@@ -1,11 +1,94 @@
 import { NextFunction, Request, Response } from 'express';
+import { logger } from '../utils/logger';
+import { UserModel } from '../models/userModel';
+import { CustomError } from '../customError';
+import { HTTP_STATUS_CODES } from '../constants/httpStatusCodes';
+import { MESSAGES } from '../constants/messages';
+import { IOtpEmailTemplate } from '../interfaces/IOtpEmailTemplate';
+import { OtpService } from '../services/otpService';
+import { EmailService } from '../services/emailService';
+import { HashService } from '../services/hashService';
 
-export const sendOtp = (req: Request, res: Response, next: NextFunction) => {};
+const otpService = new OtpService();
+const emailService = new EmailService();
+const hashService = new HashService();
 
-export const signup = (req: Request, res: Response, next: NextFunction) => {};
+export const sendOtp = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // req body validation here
+    const { firstName, lastName, email } = req.body;
+    const existingUser = await UserModel.findOne({ email: email });
+    if (existingUser) {
+      throw new CustomError(HTTP_STATUS_CODES.CONFLICT, MESSAGES.USER_ALREADY_EXISTS);
+    }
+    const otp = otpService.generateOtp(email);
+    const emailOptions: IOtpEmailTemplate = {
+      email,
+      name: `${firstName} ${lastName}`,
+      otp,
+      subject: 'Study tracker signup OTP',
+      body: 'Please enter the above mentioned OTP for verifying your email and completing signup to Study Tracker.',
+    };
+    await emailService.sendOtp(emailOptions);
+    res.json({ success: true, message: 'OTP sent successfully.' });
+  } catch (e) {
+    logger.error('ERROR: userController - sendOtp');
+    next(e);
+  }
+};
 
-export const login = (req: Request, res: Response, next: NextFunction) => {
+export const signup = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //req body validation here
+    const { firstName, lastName, email, password, otp } = req.body;
+    if (otpService.verifyOtp(otp, email)) {
+      const passwordHash = await hashService.hash(password);
+      await UserModel.insertOne({
+        firstName,
+        lastName,
+        email,
+        passwordHash,
+        isBlocked: false,
+      });
+      res.json({ success: true, message: 'Signed up successfully. Log in to continue.' });
+    } else {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INVALID_OTP);
+    }
+  } catch (e) {
+    logger.error('ERROR: userController - signup');
+    next(e);
+  }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  // req body validation here
   const { email, password } = req.body;
+  const user = await UserModel.findOne({ email: email });
+  if (!user?.passwordHash) {
+    throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+  }
+  if (user.isBlocked) {
+    throw new CustomError(HTTP_STATUS_CODES.FORBIDDEN, MESSAGES.USER_BLOCKED);
+  }
+  if (user) {
+    const verified = await hashService.compare(password!, user.passwordHash);
+
+    if (verified) {
+      res.json({
+        success: true,
+        data: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
+        message: 'Logged in successfully.',
+      });
+    } else {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+    }
+  } else {
+    throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+  }
 };
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {};

@@ -8,3 +8,33 @@ export async function userLogin(email: string, password: string) {
   });
   return response;
 }
+
+export async function sendOtp(
+  firstName: string,
+  lastName: string,
+  email: string,
+) {
+  const response = await axiosInstance.post(ROUTES.AUTH.SEND_OTP, {
+    firstName,
+    lastName,
+    email,
+  });
+  return response;
+}
+
+export async function signup(
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  otp: string,
+) {
+  const response = await axiosInstance.post(ROUTES.AUTH.SIGNUP, {
+    firstName,
+    lastName,
+    email,
+    password,
+    otp,
+  });
+  return response;
+}

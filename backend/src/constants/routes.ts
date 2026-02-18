@@ -1,11 +1,11 @@
 export const ROUTES = {
   AUTH: {
-    SEND_OTP: '/send-otp',
-    SIGNUP: '/signup',
-    LOGIN: '/login',
-    LOGOUT: '/logout',
-    REFRESH_TOKEN: '/refresh-token',
-    ME: '/me',
+    SEND_OTP: '/auth/send-otp',
+    SIGNUP: '/auth/signup',
+    LOGIN: '/auth/login',
+    LOGOUT: '/auth/logout',
+    REFRESH_TOKEN: '/auth/refresh-token',
+    ME: '/auth/me',
   },
 
   DASHBOARD: {
@@ -23,38 +23,38 @@ export const ROUTES = {
   },
 
   BOOKS: {
-    GET_ALL: '/',
-    CREATE: '/',
-    GET_ONE: '/:bookId',
-    EDIT: '/:bookId',
-    DELETE: '/:bookId',
+    GET_ALL: '/books',
+    CREATE: '/books',
+    GET_ONE: '/books/:bookId',
+    EDIT: '/books/:bookId',
+    DELETE: '/books/:bookId',
   },
 
   SECTIONS: {
-    GET_BY_BOOK: '/:bookId/sections',
-    CREATE: '/:bookId/sections',
-    EDIT: '/:sectionId',
-    DELETE: '/:sectionId',
+    GET_BY_BOOK: '/books/:bookId/sections',
+    CREATE: '/books/:bookId/sections',
+    EDIT: '/sections/:sectionId',
+    DELETE: '/sections/:sectionId',
   },
 
   CHAPTERS: {
-    GET_BY_SECTION: '/:sectionId/chapters',
-    CREATE: '/:sectionId/chapters',
-    EDIT: '/:chapterId',
-    DELETE: '/:chapterId',
+    GET_BY_SECTION: '/sections/:sectionId/chapters',
+    CREATE: '/sections/:sectionId/chapters',
+    EDIT: '/chapters/:chapterId',
+    DELETE: '/chapters/:chapterId',
   },
 
   TOPICS: {
-    GET_BY_CHAPTER: '/:chapterId/topics',
-    CREATE: '/:chapterId/topics',
-    EDIT: '/:topicId',
-    DELETE: '/:topicId',
-    TOGGLE: '/:topicId/toggle',
+    GET_BY_CHAPTER: '/chapters/:chapterId/topics',
+    CREATE: '/chapters/:chapterId/topics',
+    EDIT: '/topics/:topicId',
+    DELETE: '/topics/:topicId',
+    TOGGLE: '/topics/:topicId/toggle',
   },
 
   EXAMS: {
-    GET_ALL: '/',
-    CREATE: '/',
+    GET_ALL: '/exams',
+    CREATE: '/exams',
     EDIT: '/:examId',
     DELETE: '/:examId',
     GET_NEXT: '/next',

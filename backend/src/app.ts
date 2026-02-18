@@ -1,5 +1,6 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRouter';
@@ -12,7 +13,6 @@ import examRouter from './routes/examRouter';
 import sectionRouter from './routes/sectionRouter';
 import slotRouter from './routes/slotRouter';
 import topicRouter from './routes/topicRouter';
-dotenv.config();
 
 const app = express();
 
