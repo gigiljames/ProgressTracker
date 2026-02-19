@@ -38,3 +38,8 @@ export async function signup(
   });
   return response;
 }
+
+export async function userLogout() {
+  const response = await axiosInstance.post(ROUTES.AUTH.LOGOUT);
+  return response;
+}

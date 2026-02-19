@@ -24,10 +24,14 @@ export const getBook = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userId = req.user?.userId;
     const bookId = req.params.bookId;
-    const book = await BookModel.findById(bookId);
+    const book = await BookModel.findOne({ _id: bookId, userId });
     const sections = await SectionModel.find({ bookId: bookId });
     const chapters = await ChapterModel.find({ bookId: bookId });
     const topics = await TopicModel.find({ bookId: bookId });
+    if (!book) {
+      throw new CustomError(HTTP_STATUS_CODES.NOT_FOUND, 'Book not found.');
+    }
+    res.json({ success: true, data: book });
   } catch (e) {
     logger.error('ERROR: getBook');
     next(e);
@@ -36,7 +40,6 @@ export const getBook = async (req: Request, res: Response, next: NextFunction) =
 
 export const createBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bookId = req.params.bookId;
     const userId = req.user?.userId;
     if (!userId) {
       throw new CustomError(
@@ -44,15 +47,16 @@ export const createBook = async (req: Request, res: Response, next: NextFunction
         MESSAGES.AUTH_MIDDLEWARE_ERROR,
       );
     }
-    // req body validation here
-    const { title, desc, color } = req.body;
-    await BookModel.insertOne({
+    const { title, description, color } = req.body;
+    const book = await BookModel.insertOne({
       userId: new mongoose.Types.ObjectId(userId),
-      title: title,
-      description: desc,
-      color: color,
+      title,
+      description,
+      color,
     });
-    res.json({ success: true, message: 'Book created successfully' });
+    res
+      .status(HTTP_STATUS_CODES.CREATED)
+      .json({ success: true, message: 'Book created successfully.', data: book });
   } catch (e) {
     logger.error('ERROR: createBook');
     next(e);
@@ -64,17 +68,16 @@ export const editBook = async (req: Request, res: Response, next: NextFunction) 
     const bookId = req.params.bookId;
     const userId = req.user?.userId;
     const book = await BookModel.findById(bookId);
-    if (book?.userId !== userId) {
-      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, 'This book does not belong to you');
+    if (!book) {
+      throw new CustomError(HTTP_STATUS_CODES.NOT_FOUND, 'Book not found.');
     }
-    // req body validation here
-    const { title, desc, color } = req.body;
-    await BookModel.findByIdAndUpdate(bookId, {
-      title: title,
-      description: desc,
-      color: color,
-    });
-    res.json({ success: true, message: 'Book edited successfully' });
+    // Compare as strings to avoid ObjectId vs string mismatch
+    if (book.userId.toString() !== userId) {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, 'This book does not belong to you.');
+    }
+    const { title, description, color } = req.body;
+    await BookModel.findByIdAndUpdate(bookId, { title, description, color });
+    res.json({ success: true, message: 'Book edited successfully.' });
   } catch (e) {
     logger.error('ERROR: editBook');
     next(e);
@@ -86,13 +89,20 @@ export const deleteBook = async (req: Request, res: Response, next: NextFunction
     const bookId = req.params.bookId;
     const userId = req.user?.userId;
     const book = await BookModel.findById(bookId);
-    if (book?.userId !== userId) {
-      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, 'This book does not belong to you');
+    if (!book) {
+      throw new CustomError(HTTP_STATUS_CODES.NOT_FOUND, 'Book not found.');
     }
+    if (book.userId.toString() !== userId) {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, 'This book does not belong to you.');
+    }
+    // Cascade delete all nested documents
+    await TopicModel.deleteMany({ bookId });
+    await ChapterModel.deleteMany({ bookId });
+    await SectionModel.deleteMany({ bookId });
     await BookModel.findByIdAndDelete(bookId);
-    res.json({ success: true, message: 'Book deleted successfully' });
+    res.json({ success: true, message: 'Book deleted successfully.' });
   } catch (e) {
-    logger.error('ERROR: ');
+    logger.error('ERROR: deleteBook');
     next(e);
   }
 };

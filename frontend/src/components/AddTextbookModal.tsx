@@ -1,24 +1,38 @@
 import { useState, useRef, useEffect } from "react";
 import { IoClose, IoChevronDown } from "react-icons/io5";
 import { colors } from "../constants/colors";
+import { createBook } from "../api/bookService";
+import toast from "react-hot-toast";
 
 interface AddTextbookModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-function AddTextbookModal({ isOpen, onClose }: AddTextbookModalProps) {
+function AddTextbookModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: AddTextbookModalProps) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [color, setColor] = useState(colors[0]);
   const [isColorDropdownOpen, setIsColorDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [errors, setErrors] = useState({
-    title: "",
-    color: "",
-    desc: "",
-  });
+  const [errors, setErrors] = useState({ title: "", color: "" });
+
+  // Reset form whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTitle("");
+      setDesc("");
+      setColor(colors[0]);
+      setErrors({ title: "", color: "" });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -30,27 +44,31 @@ function AddTextbookModal({ isOpen, onClose }: AddTextbookModalProps) {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   function handleSubmit() {
-    const newErrors = {
-      title: "",
-      color: "",
-      desc: "",
-    };
-    setErrors(newErrors);
+    const newErrors = { title: "", color: "" };
 
-    if (!title.trim()) {
-      newErrors.title = "Enter a valid textbook title";
-    }
-    if (!color) {
-      newErrors.color = "Select a valid color";
-    }
+    if (!title.trim()) newErrors.title = "Enter a valid textbook title";
+    if (!color) newErrors.color = "Select a valid color";
 
     setErrors(newErrors);
+    if (newErrors.title || newErrors.color) return;
+
+    setLoading(true);
+    createBook({ title: title.trim(), description: desc.trim(), color })
+      .then(() => {
+        toast.success("Textbook added successfully.");
+        onSuccess();
+        onClose();
+      })
+      .catch((e: any) => {
+        toast.error(
+          e?.response?.data?.message || e?.message || "Failed to add textbook.",
+        );
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
@@ -138,9 +156,7 @@ function AddTextbookModal({ isOpen, onClose }: AddTextbookModalProps) {
                   <span className="text-neutral-500 text-sm">(Optional)</span>
                 </label>
                 <textarea
-                  className={`border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-[120px] focus:outline-none focus:border-neutral-600 ${
-                    errors.desc ? "ring-1 ring-red-400 border-red-400" : ""
-                  }`}
+                  className="border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-[120px] focus:outline-none focus:border-neutral-600"
                   placeholder="Enter description"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
@@ -148,10 +164,11 @@ function AddTextbookModal({ isOpen, onClose }: AddTextbookModalProps) {
               </div>
 
               <button
-                className="mt-2 w-full p-3 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 font-medium transition-colors active:bg-neutral-600"
+                className="mt-2 w-full p-3 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 font-medium transition-colors active:bg-neutral-600 disabled:opacity-50"
                 onClick={handleSubmit}
+                disabled={loading}
               >
-                Add Textbook
+                {loading ? "Adding..." : "Add Textbook"}
               </button>
             </div>
           </div>

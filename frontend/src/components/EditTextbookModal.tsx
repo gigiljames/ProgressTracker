@@ -1,23 +1,46 @@
 import { useState, useRef, useEffect } from "react";
 import { IoClose, IoChevronDown } from "react-icons/io5";
 import { colors } from "../constants/colors";
+import { editBook } from "../api/bookService";
+import toast from "react-hot-toast";
 
 interface EditTextbookModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
+  bookId: string;
+  initialTitle: string;
+  initialDescription: string;
+  initialColor: string;
 }
 
-function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [color, setColor] = useState(colors[0]);
+function EditTextbookModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  bookId,
+  initialTitle,
+  initialDescription,
+  initialColor,
+}: EditTextbookModalProps) {
+  const [title, setTitle] = useState(initialTitle);
+  const [desc, setDesc] = useState(initialDescription);
+  const [color, setColor] = useState(initialColor || colors[0]);
   const [isColorDropdownOpen, setIsColorDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [errors, setErrors] = useState({
-    title: "",
-    color: "",
-  });
+  const [errors, setErrors] = useState({ title: "", color: "" });
+
+  // Sync state when modal opens with fresh book data
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialTitle);
+      setDesc(initialDescription);
+      setColor(initialColor || colors[0]);
+      setErrors({ title: "", color: "" });
+    }
+  }, [isOpen, initialTitle, initialDescription, initialColor]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -29,17 +52,11 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   function handleSubmit() {
-    const newErrors = {
-      title: "",
-      color: "",
-    };
-    setErrors(newErrors);
+    const newErrors = { title: "", color: "" };
 
     if (!title.trim()) {
       newErrors.title = "Enter a valid textbook title";
@@ -49,6 +66,21 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
     }
 
     setErrors(newErrors);
+    if (newErrors.title || newErrors.color) return;
+
+    setLoading(true);
+    editBook(bookId, { title: title.trim(), description: desc.trim(), color })
+      .then(() => {
+        toast.success("Book updated successfully.");
+        onSuccess();
+        onClose();
+      })
+      .catch((e: any) => {
+        toast.error(
+          e?.response?.data?.message || e?.message || "Failed to update book.",
+        );
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
@@ -136,7 +168,7 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
                   <span className="text-neutral-500 text-sm">(Optional)</span>
                 </label>
                 <textarea
-                  className={`border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-30 focus:outline-none focus:border-neutral-600`}
+                  className="border border-neutral-800 rounded-md p-3 text-neutral-300 bg-neutral-900 min-h-30 focus:outline-none focus:border-neutral-600"
                   placeholder="Enter description"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
@@ -144,10 +176,11 @@ function EditTextbookModal({ isOpen, onClose }: EditTextbookModalProps) {
               </div>
 
               <button
-                className="mt-2 w-full p-3 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 font-medium transition-colors active:bg-neutral-600"
+                className="mt-2 w-full p-3 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 font-medium transition-colors active:bg-neutral-600 disabled:opacity-50"
                 onClick={handleSubmit}
+                disabled={loading}
               >
-                Save Changes
+                {loading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

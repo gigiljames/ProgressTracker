@@ -2,18 +2,34 @@ import { useState } from "react";
 import { userLogin } from "../api/userAuthService";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
+import { userInfoStore } from "../zustand/userInfoStore";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const setUserInfo = userInfoStore((state) => state.setUserInfo);
 
   function handleLogin() {
     userLogin(email, password)
       .then((response) => {
-        console.log(response);
+        const data = response.data;
+        if (data.success) {
+          setUserInfo({
+            fName: data.data?.firstName as string,
+            lName: data.data?.lastName as string,
+            email: data.data?.email as string,
+            token: data.data?.accessToken as string,
+            role: "USER",
+          });
+          toast.success(data.message);
+        } else {
+          toast.error(data.message);
+        }
       })
       .catch((e) => {
-        toast.error(e);
+        toast.error(
+          e?.response?.data?.message || e?.message || "Login failed.",
+        );
       });
   }
 

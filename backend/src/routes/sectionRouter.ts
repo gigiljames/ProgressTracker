@@ -23,7 +23,7 @@ sectionRouter.patch(ROUTES.SECTIONS.EDIT, authMiddleware([ROLES.USER]), (req, re
   editSection(req, res, next);
 });
 
-sectionRouter.delete(ROUTES.SECTIONS.CREATE, authMiddleware([ROLES.USER]), (req, res, next) => {
+sectionRouter.delete(ROUTES.SECTIONS.DELETE, authMiddleware([ROLES.USER]), (req, res, next) => {
   deleteSection(req, res, next);
 });
 

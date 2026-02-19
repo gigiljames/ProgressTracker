@@ -20,7 +20,7 @@ userRouter.post(ROUTES.AUTH.SIGNUP, (req, res, next) => {
   signup(req, res, next);
 });
 
-userRouter.post(ROUTES.AUTH.REFRESH_TOKEN, (req, res, next) => {
+userRouter.get(ROUTES.AUTH.REFRESH_TOKEN, (req, res, next) => {
   refresh(req, res, next);
 });
 

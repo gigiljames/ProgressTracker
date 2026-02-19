@@ -72,6 +72,14 @@ const dailySlotSchema = new Schema<IDailySlot>(
       type: String,
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      default: '',
+    },
     tasks: {
       type: [slotTaskSchema],
       default: [],

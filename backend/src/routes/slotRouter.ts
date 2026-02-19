@@ -2,24 +2,29 @@ import { Router } from 'express';
 import { ROUTES } from '../constants/routes';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { ROLES } from '../enums/roles';
-import { createSlot, deleteSlot, editSlot, getSlots } from '../controllers/slotController';
+import {
+  createSlot,
+  deleteSlot,
+  editSlot,
+  getSlots,
+  addTask,
+  editTask,
+  deleteTask,
+  toggleTask,
+} from '../controllers/slotController';
 
 const slotRouter = Router();
 
-slotRouter.get(ROUTES.DASHBOARD.GET_SLOTS, authMiddleware([ROLES.USER]), (req, res, next) => {
-  getSlots(req, res, next);
-});
+// Slot CRUD
+slotRouter.get(ROUTES.DASHBOARD.GET_SLOTS, authMiddleware([ROLES.USER]), getSlots);
+slotRouter.post(ROUTES.DASHBOARD.CREATE_SLOT, authMiddleware([ROLES.USER]), createSlot);
+slotRouter.patch(ROUTES.DASHBOARD.EDIT_SLOT, authMiddleware([ROLES.USER]), editSlot);
+slotRouter.delete(ROUTES.DASHBOARD.DELETE_SLOT, authMiddleware([ROLES.USER]), deleteSlot);
 
-slotRouter.post(ROUTES.DASHBOARD.CREATE_SLOT, authMiddleware([ROLES.USER]), (req, res, next) => {
-  createSlot(req, res, next);
-});
-
-slotRouter.patch(ROUTES.DASHBOARD.EDIT_SLOT, authMiddleware([ROLES.USER]), (req, res, next) => {
-  editSlot(req, res, next);
-});
-
-slotRouter.delete(ROUTES.DASHBOARD.DELETE_SLOT, authMiddleware([ROLES.USER]), (req, res, next) => {
-  deleteSlot(req, res, next);
-});
+// Task CRUD
+slotRouter.post(ROUTES.TASKS.ADD_TASK, authMiddleware([ROLES.USER]), addTask);
+slotRouter.patch(ROUTES.TASKS.EDIT_TASK, authMiddleware([ROLES.USER]), editTask);
+slotRouter.delete(ROUTES.TASKS.DELETE_TASK, authMiddleware([ROLES.USER]), deleteTask);
+slotRouter.patch(ROUTES.TASKS.TOGGLE_TASK, authMiddleware([ROLES.USER]), toggleTask);
 
 export default slotRouter;

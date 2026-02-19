@@ -8,10 +8,13 @@ import { IOtpEmailTemplate } from '../interfaces/IOtpEmailTemplate';
 import { OtpService } from '../services/otpService';
 import { EmailService } from '../services/emailService';
 import { HashService } from '../services/hashService';
+import TokenService from '../services/tokenService';
+import { ROLES } from '../enums/roles';
 
 const otpService = new OtpService();
 const emailService = new EmailService();
 const hashService = new HashService();
+const tokenService = new TokenService();
 
 export const sendOtp = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -61,36 +64,100 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-  // req body validation here
-  const { email, password } = req.body;
-  const user = await UserModel.findOne({ email: email });
-  if (!user?.passwordHash) {
-    throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
-  }
-  if (user.isBlocked) {
-    throw new CustomError(HTTP_STATUS_CODES.FORBIDDEN, MESSAGES.USER_BLOCKED);
-  }
-  if (user) {
-    const verified = await hashService.compare(password!, user.passwordHash);
-
-    if (verified) {
-      res.json({
-        success: true,
-        data: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        },
-        message: 'Logged in successfully.',
-      });
+  try {
+    // req body validation here
+    const { email, password } = req.body;
+    const user = await UserModel.findOne({ email: email });
+    if (!user?.passwordHash) {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+    }
+    if (user.isBlocked) {
+      throw new CustomError(HTTP_STATUS_CODES.FORBIDDEN, MESSAGES.USER_BLOCKED);
+    }
+    if (user) {
+      const verified = await hashService.compare(password!, user.passwordHash);
+      if (verified) {
+        const { refreshToken } = tokenService.generateRefreshToken({
+          userId: user.id,
+          role: ROLES.USER,
+        });
+        // this service also returns tokenId, use if needed
+        //store tokenId in cache
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        const accessToken = tokenService.generateAccessToken({
+          userId: user.id,
+          role: ROLES.USER,
+        });
+        res.json({
+          success: true,
+          data: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            accessToken,
+          },
+          message: 'Logged in successfully.',
+        });
+      } else {
+        throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+      }
     } else {
       throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
     }
-  } else {
-    throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, MESSAGES.INCORRECT_AUTH_CREDENTIALS);
+  } catch (e) {
+    logger.error('ERROR: userController - login');
+    next(e);
   }
 };
 
-export const logout = (req: Request, res: Response, next: NextFunction) => {};
+export const logout = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+    });
+    res.json({ success: true, message: 'Logged out successfully.' });
+  } catch (e) {
+    logger.error('ERROR: userController - logout');
+    next(e);
+  }
+};
 
-export const refresh = (req: Request, res: Response, next: NextFunction) => {};
+export const refresh = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken as string;
+    if (!refreshToken) {
+      throw new Error("Refresh token doesn't exist");
+    }
+    const payload = tokenService.verifyRefreshToken(refreshToken);
+    // check tokenId in cache
+    const accessToken = tokenService.generateAccessToken({
+      userId: payload.userId,
+      role: payload.role,
+    });
+    const data = tokenService.generateRefreshToken({
+      userId: payload.userId,
+      role: payload.role,
+    });
+    //store tokenId in cache
+    res.cookie('refreshToken', data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.json({ success: true, accessToken });
+  } catch (error) {
+    logger.error('ERROR: userController - refresh');
+    next(error);
+  }
+};
