@@ -14,8 +14,10 @@ export function errorHandlerMiddleware(
     err instanceof CustomError ? err.statusCode : HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR;
   if (process.env.NODE_ENV === 'production') {
     productionLogger.error(err.message || 'Something went wrong.');
+    productionLogger.error(err.stack || 'Stack trace not available.');
   } else {
     devLogger.error(err.message || 'Something went wrong.');
+    devLogger.error(err.stack || 'Stack trace not available.');
   }
   res.status(statusCode).json({
     success: false,
