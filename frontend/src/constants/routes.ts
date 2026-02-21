@@ -7,6 +7,7 @@ export const ROUTES = {
     LOGOUT: "/auth/logout",
     REFRESH_TOKEN: "/auth/refresh",
     ME: "/auth/me",
+    GOOGLE_LOGIN: "/auth/google",
   },
 
   DASHBOARD: {

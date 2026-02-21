@@ -79,7 +79,7 @@ type Book = {
 
 // ── ExpandableText ─────────────────────────────────────────────────────────
 
-const CHAR_LIMIT = 120;
+const CHAR_LIMIT = 100;
 
 function ExpandableText({
   text,
@@ -624,6 +624,13 @@ function ViewTextbookPage() {
           <h1 className="text-white font-extrabold text-5xl leading-tight">
             {bookData.title}
           </h1>
+          {/* Book Description */}
+          <div className="mb-4 w-full">
+            <ExpandableText
+              text={bookData.description}
+              className="text-lg text-neutral-400 leading-relaxed"
+            />
+          </div>
           <div className="flex gap-3 flex-wrap">
             <button
               className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 rounded-xl px-5 py-3 font-medium transition-colors flex items-center gap-2"
@@ -646,14 +653,6 @@ function ViewTextbookPage() {
               Delete Book
             </button>
           </div>
-        </div>
-
-        {/* Book Description */}
-        <div className="mb-8 max-w-4xl">
-          <ExpandableText
-            text={bookData.description}
-            className="text-lg text-neutral-400 leading-relaxed"
-          />
         </div>
 
         {/* Content Header */}

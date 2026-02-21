@@ -16,7 +16,7 @@ function ExamsPage() {
       />
       <div className="h-screen w-screen bg-neutral-950 flex flex-col py-8 px-10">
         <div className="flex justify-between mb-8">
-          <h1 className="text-white font-extrabold text-5xl">My Exams</h1>
+          <h1 className="text-white font-extrabold text-4xl">My Exams</h1>
           <div className="flex gap-4">
             <div className="border border-neutral-700 rounded-full text-neutral-300 relative">
               <input

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import { logger } from '../utils/logger';
 import { UserModel } from '../models/userModel';
 import { CustomError } from '../customError';
@@ -15,6 +16,7 @@ const otpService = new OtpService();
 const emailService = new EmailService();
 const hashService = new HashService();
 const tokenService = new TokenService();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const sendOtp = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -85,7 +87,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         //store tokenId in cache
         res.cookie('refreshToken', refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
+          // secure: process.env.NODE_ENV === 'production',
+          secure: true,
           sameSite: 'none',
           path: '/',
           maxAge: 24 * 60 * 60 * 1000,
@@ -150,8 +153,10 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
     //store tokenId in cache
     res.cookie('refreshToken', data.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      // secure: process.env.NODE_ENV === 'production',
+      // sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -159,5 +164,81 @@ export const refresh = (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     logger.error('ERROR: userController - refresh');
     next(error);
+  }
+};
+
+export const googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      throw new CustomError(HTTP_STATUS_CODES.BAD_REQUEST, 'Google credential is required.');
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      throw new CustomError(HTTP_STATUS_CODES.UNAUTHORIZED, 'Invalid Google token.');
+    }
+
+    const { email, sub: googleId, given_name: firstName, family_name: lastName } = payload;
+
+    let user = await UserModel.findOne({ $or: [{ googleId }, { email }] });
+
+    if (!user) {
+      // Create new user
+      user = new UserModel({
+        firstName: firstName || 'Google',
+        lastName: lastName || 'User',
+        email,
+        googleId,
+        isBlocked: false,
+      });
+      await user.save();
+    } else if (!user.googleId) {
+      // Link googleId to existing email account
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    if (user.isBlocked) {
+      throw new CustomError(HTTP_STATUS_CODES.FORBIDDEN, MESSAGES.USER_BLOCKED);
+    }
+
+    const { refreshToken } = tokenService.generateRefreshToken({
+      userId: user.id,
+      role: ROLES.USER,
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === 'production',
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    const accessToken = tokenService.generateAccessToken({
+      userId: user.id,
+      role: ROLES.USER,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        accessToken,
+      },
+      message: 'Logged in with Google successfully.',
+    });
+  } catch (e) {
+    logger.error('ERROR: userController - googleLogin');
+    next(e);
   }
 };

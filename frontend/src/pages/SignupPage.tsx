@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router";
-import { sendOtp, signup } from "../api/userAuthService";
+import { Link, useNavigate } from "react-router";
+import { googleLogin, sendOtp, signup } from "../api/userAuthService";
 import toast from "react-hot-toast";
 import OtpModal from "../components/OtpModal";
+import { GoogleLogin } from "@react-oauth/google";
+import { FcGoogle } from "react-icons/fc";
+import { userInfoStore } from "../zustand/userInfoStore";
 
 function SignupPage() {
   const [fName, setFName] = useState("");
@@ -13,6 +16,8 @@ function SignupPage() {
   const [otpModal, setOtpModal] = useState(false);
   const [otpModalLoading, setOtpModalLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const setUserInfo = userInfoStore((state) => state.setUserInfo);
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({
     fName: "",
     lName: "",
@@ -113,6 +118,34 @@ function SignupPage() {
       });
   }
 
+  const handleGoogleSuccess = (credential: string) => {
+    setLoading(true);
+    googleLogin(credential)
+      .then((response) => {
+        const data = response.data;
+        if (data.success) {
+          setUserInfo({
+            fName: data.data?.firstName as string,
+            lName: data.data?.lastName as string,
+            email: data.data?.email as string,
+            token: data.data?.accessToken as string,
+            role: "USER",
+          });
+          toast.success(data.message);
+          navigate("/");
+        } else {
+          toast.error(data.message);
+        }
+        setLoading(false);
+      })
+      .catch((e) => {
+        toast.error(
+          e?.response?.data?.message || e?.message || "Google login failed.",
+        );
+        setLoading(false);
+      });
+  };
+
   return (
     <>
       <OtpModal
@@ -127,7 +160,38 @@ function SignupPage() {
           <h1 className="text-neutral-300 text-center text-2xl font-extrabold">
             Sign up
           </h1>
+
           <div className="flex flex-col gap-3">
+            <div className="relative group/google w-full">
+              <button
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 p-2 rounded-md bg-transparent border border-neutral-700 text-neutral-300 group-hover/google:bg-neutral-800 group-hover/google:text-white font-medium transition-all h-14 disabled:opacity-50"
+              >
+                <FcGoogle className="text-2xl" />
+                Sign up with Google
+              </button>
+              <div className="absolute inset-0 opacity-0 overflow-hidden scale-[2] origin-center">
+                <GoogleLogin
+                  onSuccess={(credentialResponse) => {
+                    if (credentialResponse.credential) {
+                      handleGoogleSuccess(credentialResponse.credential);
+                    }
+                  }}
+                  onError={() => {
+                    toast.error("Google Login Failed");
+                  }}
+                  useOneTap
+                  theme="filled_black"
+                  shape="rectangular"
+                  width="100%"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-[1px] bg-neutral-800"></div>
+              <span className="text-neutral-600 text-sm">OR</span>
+              <div className="flex-1 h-[1px] bg-neutral-800"></div>
+            </div>
             <div className="flex flex-col gap-1">
               <h2 className="font-medium text-neutral-300">First name</h2>
               <input
@@ -206,7 +270,7 @@ function SignupPage() {
               {errors.rePassword && (
                 <div className="text-red-400 pl-1">{errors.rePassword}</div>
               )}
-            </div>
+            </div>{" "}
             <button
               className="p-2 rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 font-medium h-14 active:text-neutral-200 active:bg-neutral-600"
               onClick={handleSignup}

@@ -1,12 +1,23 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { ROUTES } from '../constants/routes';
-import { login, logout, refresh, sendOtp, signup } from '../controllers/userController';
+import {
+  googleLogin,
+  login,
+  logout,
+  refresh,
+  sendOtp,
+  signup,
+} from '../controllers/userController';
 import { HTTP_STATUS_CODES } from '../constants/httpStatusCodes';
 
 const userRouter = Router();
 
 userRouter.post(ROUTES.AUTH.LOGIN, (req: Request, res: Response, next: NextFunction) => {
   login(req, res, next);
+});
+
+userRouter.post(ROUTES.AUTH.GOOGLE_LOGIN, (req: Request, res: Response, next: NextFunction) => {
+  googleLogin(req, res, next);
 });
 
 userRouter.post(ROUTES.AUTH.LOGOUT, (req: Request, res: Response, next: NextFunction) => {
