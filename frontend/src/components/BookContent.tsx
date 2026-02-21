@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   IoChevronDown,
   IoChevronForward,
@@ -142,7 +142,7 @@ const BookContent = () => {
   const [expandedChapters, setExpandedChapters] = useState(["chap001"]);
   const [expandAll, setExpandAll] = useState(false);
 
-  const toggleSection = (sectionId) => {
+  const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
@@ -150,7 +150,7 @@ const BookContent = () => {
     );
   };
 
-  const toggleChapter = (chapterId) => {
+  const toggleChapter = (chapterId: string) => {
     setExpandedChapters((prev) =>
       prev.includes(chapterId)
         ? prev.filter((id) => id !== chapterId)
@@ -171,7 +171,11 @@ const BookContent = () => {
     setExpandAll(!expandAll);
   };
 
-  const toggleTopicComplete = (sectionId, chapterId, topicId) => {
+  const toggleTopicComplete = (
+    sectionId: string,
+    chapterId: string,
+    topicId: string,
+  ) => {
     setBook((prev) => ({
       ...prev,
       sections: prev.sections.map((section) => {
@@ -205,7 +209,7 @@ const BookContent = () => {
     }));
   };
 
-  const calculateProgress = (completed, total) => {
+  const calculateProgress = (completed: number, total: number) => {
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   };
 
@@ -224,14 +228,14 @@ const BookContent = () => {
     }));
   };
 
-  const deleteSection = (sectionId) => {
+  const deleteSection = (sectionId: string) => {
     setBook((prev) => ({
       ...prev,
       sections: prev.sections.filter((s) => s._id !== sectionId),
     }));
   };
 
-  const addChapter = (sectionId) => {
+  const addChapter = (sectionId: string) => {
     const newChapter = {
       _id: `chap${Date.now()}`,
       title: "New Chapter",
@@ -255,7 +259,7 @@ const BookContent = () => {
     }));
   };
 
-  const deleteChapter = (sectionId, chapterId) => {
+  const deleteChapter = (sectionId: string, chapterId: string) => {
     setBook((prev) => ({
       ...prev,
       sections: prev.sections.map((section) => {
@@ -271,7 +275,7 @@ const BookContent = () => {
     }));
   };
 
-  const addTopic = (sectionId, chapterId) => {
+  const addTopic = (sectionId: string, chapterId: string) => {
     const newTopic = {
       _id: `top${Date.now()}`,
       title: "New Topic",
@@ -302,7 +306,11 @@ const BookContent = () => {
     }));
   };
 
-  const deleteTopic = (sectionId, chapterId, topicId) => {
+  const deleteTopic = (
+    sectionId: string,
+    chapterId: string,
+    topicId: string,
+  ) => {
     setBook((prev) => ({
       ...prev,
       sections: prev.sections.map((section) => {

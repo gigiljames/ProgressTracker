@@ -620,25 +620,25 @@ function ViewTextbookPage() {
       <Navbar />
       <div className="min-h-screen w-full bg-neutral-950 flex flex-col py-8 px-10 overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between mb-8">
-          <h1 className="text-white font-extrabold text-5xl">
+        <div className="flex flex-col gap-4 mb-8">
+          <h1 className="text-white font-extrabold text-5xl leading-tight">
             {bookData.title}
           </h1>
-          <div className="flex gap-4">
+          <div className="flex gap-3 flex-wrap">
             <button
-              className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-neutral-300 rounded-full px-5 py-2 font-medium transition-colors"
+              className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 rounded-xl px-5 py-3 font-medium transition-colors flex items-center gap-2"
               onClick={() => setActiveModal({ type: "ADD_SECTION" })}
             >
               Add Section
             </button>
             <button
-              className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-neutral-300 rounded-full px-5 py-2 font-medium transition-colors"
+              className="bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 rounded-xl px-5 py-3 font-medium transition-colors"
               onClick={() => setEditBookModal(true)}
             >
               Edit Book
             </button>
             <button
-              className="bg-red-400 hover:bg-red-500 text-neutral-100 rounded-full px-5 py-2 font-medium transition-colors"
+              className="bg-red-500/20 border border-red-500/40 hover:bg-red-500/30 active:bg-red-500/40 text-red-400 rounded-xl px-5 py-3 font-medium transition-colors"
               onClick={() =>
                 setConfirmModal({ isOpen: true, type: "BOOK", ids: null })
               }
@@ -711,8 +711,9 @@ function ViewTextbookPage() {
                         {section.title}
                       </h3>
                       <span className="text-sm text-neutral-500">
-                        {section.chapters.length} Chapters • {secProgress}%
-                        Completed
+                        {section.chapters.length} chapter
+                        {section.chapters.length !== 1 ? "s" : ""} •{" "}
+                        {completedTopics}/{totalTopics} topics
                       </span>
                       {section.description && (
                         <ExpandableText
@@ -749,9 +750,9 @@ function ViewTextbookPage() {
                             sectionId: section._id,
                           })
                         }
-                        className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg"
+                        className="flex items-center gap-1.5 px-3 py-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl text-sm transition-colors"
                       >
-                        <IoAdd />
+                        <IoAdd size={16} /> Add chapter
                       </button>
                       <button
                         title="Edit Section"
@@ -763,16 +764,16 @@ function ViewTextbookPage() {
                             initialDescription: section.description,
                           })
                         }
-                        className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg"
+                        className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                       >
-                        <IoPencil />
+                        <IoPencil size={18} />
                       </button>
                       <button
                         title="Delete Section"
                         onClick={() => handleDelete("SECTION", section._id)}
-                        className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg"
+                        className="p-2.5 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                       >
-                        <IoTrash />
+                        <IoTrash size={18} />
                       </button>
                     </div>
                   </div>
@@ -825,8 +826,8 @@ function ViewTextbookPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-6 px-4 flex-shrink-0">
-                              <div className="w-32 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                            <div className="flex items-center gap-4 px-4 flex-shrink-0">
+                              <div className="w-28 h-2 bg-neutral-800 rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full transition-all duration-500"
                                   style={{
@@ -835,8 +836,18 @@ function ViewTextbookPage() {
                                   }}
                                 />
                               </div>
+                              <span
+                                className="text-sm font-semibold w-10 text-right"
+                                style={{ color: bookData.color }}
+                              >
+                                {chapProgress}%
+                              </span>
+                              <span className="text-xs text-neutral-500 whitespace-nowrap">
+                                {chapter.completedTopics}/{chapter.totalTopics}{" "}
+                                topics
+                              </span>
 
-                              <div className="flex gap-1 ml-4 opacity-50 hover:opacity-100 transition-opacity">
+                              <div className="flex gap-1 ml-2">
                                 <button
                                   title="Add Topic"
                                   onClick={() =>
@@ -846,9 +857,9 @@ function ViewTextbookPage() {
                                       chapterId: chapter._id,
                                     })
                                   }
-                                  className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded"
+                                  className="flex items-center gap-1.5 px-2.5 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl text-sm transition-colors"
                                 >
-                                  <IoAdd size={16} />
+                                  <IoAdd size={15} /> Add topic
                                 </button>
                                 <button
                                   title="Edit Chapter"
@@ -861,7 +872,7 @@ function ViewTextbookPage() {
                                       initialDescription: chapter.description,
                                     })
                                   }
-                                  className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded"
+                                  className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                                 >
                                   <IoPencil size={16} />
                                 </button>
@@ -874,7 +885,7 @@ function ViewTextbookPage() {
                                       chapter._id,
                                     )
                                   }
-                                  className="p-1.5 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded"
+                                  className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                                 >
                                   <IoTrash size={16} />
                                 </button>
@@ -942,7 +953,7 @@ function ViewTextbookPage() {
                                     </div>
                                   </div>
 
-                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                  <div className="flex gap-2 flex-shrink-0">
                                     <button
                                       title="Edit Topic"
                                       onClick={() =>
@@ -955,9 +966,9 @@ function ViewTextbookPage() {
                                           initialDescription: topic.description,
                                         })
                                       }
-                                      className="text-xs text-neutral-500 hover:text-white px-2 py-1 rounded bg-neutral-800"
+                                      className="p-2.5 text-neutral-500 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                                     >
-                                      Edit
+                                      <IoPencil size={16} />
                                     </button>
                                     <button
                                       title="Delete Topic"
@@ -969,9 +980,9 @@ function ViewTextbookPage() {
                                           topic._id,
                                         )
                                       }
-                                      className="text-xs text-neutral-500 hover:text-red-400 px-2 py-1 rounded bg-neutral-800"
+                                      className="p-2.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                                     >
-                                      Delete
+                                      <IoTrash size={16} />
                                     </button>
                                   </div>
                                 </div>

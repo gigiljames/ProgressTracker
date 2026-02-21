@@ -35,6 +35,9 @@ function EditExamModal({ isOpen, onClose }: EditExamModalProps) {
     }
 
     setErrors(newErrors);
+    if (!valid) {
+      return;
+    }
   }
 
   return (

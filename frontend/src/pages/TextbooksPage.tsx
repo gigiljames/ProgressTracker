@@ -21,6 +21,7 @@ type Book = {
 
 function TextbooksPage() {
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +45,13 @@ function TextbooksPage() {
   }, []);
 
   const filteredBooks = books.filter((book) => {
+    // Search filter (title, case-insensitive)
+    if (
+      searchQuery.trim() &&
+      !book.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    ) {
+      return false;
+    }
     if (filter === "completed") {
       return book.totalTopics > 0 && book.completedTopics === book.totalTopics;
     }
@@ -58,22 +66,23 @@ function TextbooksPage() {
   return (
     <>
       <Navbar />
-      <div className="h-screen w-screen bg-neutral-950 flex flex-col py-8 px-10">
-        <div className="flex justify-between mb-8">
-          <h1 className="text-white font-extrabold text-5xl">My Books</h1>
-          <div className="flex gap-4">
-            <div className="border border-neutral-700 rounded-full text-neutral-300 relative">
+      <div className="h-screen w-screen bg-neutral-950 flex flex-col py-8 px-10 overflow-y-auto">
+        <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
+          <h1 className="text-white font-extrabold text-4xl">My Books</h1>
+          <div className="flex gap-3 items-center flex-wrap">
+            {/* Search */}
+            <div className="relative">
+              <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-lg pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search books"
-                className="h-full rounded-full p-2 pr-10 pl-3"
+                placeholder="Search books…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-3 text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 w-52"
               />
-              <span className="text-2xl absolute right-2.5 top-2.5 h-full ">
-                <IoSearch />
-              </span>
             </div>
             <button
-              className="bg-neutral-500 rounded-full flex justify-center items-center px-4 text-lg"
+              className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 rounded-xl px-5 py-3 font-medium transition-colors"
               onClick={() => setIsAddModalOpen(true)}
             >
               Add book
@@ -116,7 +125,7 @@ function TextbooksPage() {
             No books found.
           </div>
         ) : (
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {filteredBooks.map((book) => (
               <div
                 key={book._id}

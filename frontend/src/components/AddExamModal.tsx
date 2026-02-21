@@ -32,6 +32,9 @@ function AddExamModal({ isOpen, onClose }: AddExamModalProps) {
       newErrors.examDate = "Enter a valid exam date";
     }
     setErrors(newErrors);
+    if (!valid) {
+      return;
+    }
   }
   return (
     <>

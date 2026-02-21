@@ -12,6 +12,14 @@ function SignupPage() {
   const [rePassword, setRePassword] = useState("");
   const [otpModal, setOtpModal] = useState(false);
   const [otpModalLoading, setOtpModalLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    fName: "",
+    lName: "",
+    email: "",
+    password: "",
+    rePassword: "",
+  });
 
   function resetFormStates() {
     setFName("");
@@ -22,14 +30,66 @@ function SignupPage() {
   }
 
   function handleSignup() {
-    sendOtp(fName, lName, email).then((response) => {
-      if (response.data.success) {
-        toast.success("OTP sent successfully.");
-        setOtpModal(true);
-      } else {
-        toast.error(response.data.message);
-      }
-    });
+    let valid = true;
+    setLoading(true);
+    const newErrors = {
+      fName: "",
+      lName: "",
+      email: "",
+      password: "",
+      rePassword: "",
+    };
+
+    if (!fName.trim()) {
+      valid = false;
+      newErrors.fName = "Enter a valid first name";
+    }
+
+    if (!lName.trim()) {
+      valid = false;
+      newErrors.lName = "Enter a valid last name";
+    }
+
+    if (!email.trim()) {
+      valid = false;
+      newErrors.email = "Enter a valid email";
+    }
+
+    if (!password.trim()) {
+      valid = false;
+      newErrors.password = "Enter a valid password";
+    }
+
+    if (!rePassword.trim()) {
+      valid = false;
+      newErrors.rePassword = "Enter a valid re-password";
+    } else if (password.trim() !== rePassword.trim()) {
+      valid = false;
+      newErrors.rePassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+
+    if (!valid) {
+      setLoading(false);
+      return;
+    }
+
+    sendOtp(fName, lName, email)
+      .then((response) => {
+        if (response.data.success) {
+          toast.success("OTP sent successfully.");
+          setOtpModal(true);
+        } else {
+          toast.error(response.data.message);
+        }
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.log(e);
+        toast.error("An error has occured.");
+        setLoading(false);
+      });
   }
 
   function handleOtpSubmit(otp: string) {
@@ -44,9 +104,12 @@ function SignupPage() {
         } else {
           toast.error(response.data.message);
         }
+        setOtpModalLoading(false);
       })
       .catch((e) => {
+        console.log(e);
         toast.error("An error has occured.");
+        setOtpModalLoading(false);
       });
   }
 
@@ -59,55 +122,100 @@ function SignupPage() {
         onSubmit={handleOtpSubmit}
         isLoading={otpModalLoading}
       />
-      <div className="h-screen w-screen bg-neutral-950 flex justify-center pt-20">
-        <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 px-8 py-10 rounded-lg">
+      <div className="h-screen w-screen bg-neutral-950 flex justify-center pt-20 overflow-y-auto pb-20">
+        <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 px-8 py-10 rounded-lg min-w-100">
           <h1 className="text-neutral-300 text-center text-2xl font-extrabold">
             Sign up
           </h1>
           <div className="flex flex-col gap-3">
-            <input
-              className="border border-neutral-800 rounded-md p-2 text-neutral-300"
-              type="text"
-              placeholder="Enter your first name"
-              value={fName}
-              onChange={(e) => setFName(e.target.value)}
-            />
-            <input
-              className="border border-neutral-800 rounded-md p-2 text-neutral-300"
-              type="text"
-              placeholder="Enter your last name"
-              value={lName}
-              onChange={(e) => setLName(e.target.value)}
-            />
-            <input
-              className="border border-neutral-800 rounded-md p-2 text-neutral-300"
-              type="text"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="border border-neutral-800 rounded-md p-2 text-neutral-300"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              className="border border-neutral-800 rounded-md p-2 text-neutral-300"
-              type="password"
-              placeholder="Re-enter password"
-              value={rePassword}
-              onChange={(e) => setRePassword(e.target.value)}
-            />
+            <div className="flex flex-col gap-1">
+              <h2 className="font-medium text-neutral-300">First name</h2>
+              <input
+                className={`border border-neutral-800 rounded-md p-2 text-neutral-300 h-14 mb-1 ${
+                  errors.fName ? "ring ring-red-400" : ""
+                }`}
+                type="text"
+                placeholder="Enter your first name"
+                value={fName}
+                onChange={(e) => setFName(e.target.value)}
+              />
+              {errors.fName && (
+                <div className="text-red-400 pl-1">{errors.fName}</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h2 className="font-medium text-neutral-300">Last name</h2>
+              <input
+                className={`border border-neutral-800 rounded-md p-2 text-neutral-300 h-14 mb-1 ${
+                  errors.lName ? "ring ring-red-400" : ""
+                }`}
+                type="text"
+                placeholder="Enter your last name"
+                value={lName}
+                onChange={(e) => setLName(e.target.value)}
+              />
+              {errors.lName && (
+                <div className="text-red-400 pl-1">{errors.lName}</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h2 className="font-medium text-neutral-300">Email</h2>
+              <input
+                className={`border border-neutral-800 rounded-md p-2 text-neutral-300 h-14 mb-1 ${
+                  errors.email ? "ring ring-red-400" : ""
+                }`}
+                type="text"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {errors.email && (
+                <div className="text-red-400 pl-1">{errors.email}</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h2 className="font-medium text-neutral-300">Password</h2>
+              <input
+                className={`border border-neutral-800 rounded-md p-2 text-neutral-300 h-14 mb-1 ${
+                  errors.password ? "ring ring-red-400" : ""
+                }`}
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {errors.password && (
+                <div className="text-red-400 pl-1 max-w-90">
+                  {errors.password}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h2 className="font-medium text-neutral-300">
+                Re-enter password
+              </h2>
+              <input
+                className={`border border-neutral-800 rounded-md p-2 text-neutral-300 h-14 mb-1 ${
+                  errors.rePassword ? "ring ring-red-400" : ""
+                }`}
+                type="password"
+                placeholder="Re-enter password"
+                value={rePassword}
+                onChange={(e) => setRePassword(e.target.value)}
+              />
+              {errors.rePassword && (
+                <div className="text-red-400 pl-1">{errors.rePassword}</div>
+              )}
+            </div>
             <button
-              className="p-2 rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 font-medium active:text-neutral-200 active:bg-neutral-600"
+              className="p-2 rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 font-medium h-14 active:text-neutral-200 active:bg-neutral-600"
               onClick={handleSignup}
+              disabled={loading}
             >
-              Sign up
+              {loading ? "Sending OTP..." : "Sign up"}
             </button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center">
             <span className="text-neutral-500">Already have an account?</span>
             <Link
               to={"/login"}

@@ -38,8 +38,8 @@ function OtpModal({
   if (!isOpen) return null;
 
   return (
-    <div className="w-screen h-screen fixed inset-0 flex justify-center bg-black/50">
-      <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 p-6 rounded-lg relative mt-15 min-w-100">
+    <div className="w-screen h-screen fixed inset-0 flex justify-center items-center bg-black/50">
+      <div className="bg-neutral-900 flex flex-col gap-5 h-fit border border-neutral-700 p-6 rounded-lg relative min-w-100">
         {/* Close Button */}
         <div
           className="absolute right-4 top-4 text-2xl text-neutral-300 hover:bg-neutral-700/75 p-1 rounded-md cursor-pointer"

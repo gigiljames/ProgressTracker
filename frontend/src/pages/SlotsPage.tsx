@@ -105,23 +105,23 @@ function MiniCalendar({
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="absolute top-full right-0 mt-2 z-[70] bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-4 w-[280px]">
+    <div className="absolute top-full right-0 mt-2 z-[70] bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl p-4 w-[300px]">
       {/* Month nav */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
-          className="p-1 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg"
+          className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg active:bg-neutral-700"
         >
-          <IoIosArrowBack size={16} />
+          <IoIosArrowBack size={18} />
         </button>
         <span className="text-neutral-300 font-semibold text-sm">
           {months[view.getMonth()]} {view.getFullYear()}
         </span>
         <button
           onClick={nextMonth}
-          className="p-1 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg rotate-180"
+          className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg rotate-180 active:bg-neutral-700"
         >
-          <IoIosArrowBack size={16} />
+          <IoIosArrowBack size={18} />
         </button>
       </div>
 
@@ -135,7 +135,7 @@ function MiniCalendar({
       </div>
 
       {/* Date cells */}
-      <div className="grid grid-cols-7 gap-y-0.5">
+      <div className="grid grid-cols-7 gap-y-1">
         {cells.map((day, i) => {
           if (!day) return <div key={`e-${i}`} />;
           const iso = `${view.getFullYear()}-${String(view.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -148,7 +148,7 @@ function MiniCalendar({
                 onChange(new Date(view.getFullYear(), view.getMonth(), day));
                 onClose();
               }}
-              className={`text-xs rounded-lg py-1.5 transition-colors ${
+              className={`text-sm rounded-lg py-2 transition-colors ${
                 isSelected
                   ? "bg-neutral-600 text-white font-bold"
                   : isToday
@@ -343,15 +343,15 @@ function SlotsPage() {
       <Navbar />
       <div className="min-h-screen w-screen bg-neutral-950 flex flex-col py-8 px-10">
         {/* ── Header ── */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-white font-extrabold text-5xl">My Slots</h1>
+        <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
+          <h1 className="text-white font-extrabold text-4xl">My Slots</h1>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-center flex-wrap">
             {/* Date navigator */}
-            <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2">
+            <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-1.5">
               <button
                 onClick={() => navigate(-1)}
-                className="text-neutral-400 hover:text-white p-1.5 rounded-full hover:bg-neutral-800 transition-colors"
+                className="text-neutral-400 hover:text-white p-3 rounded-xl hover:bg-neutral-800 active:bg-neutral-700 transition-colors"
                 title="Previous day"
               >
                 <IoIosArrowBack size={20} />
@@ -361,7 +361,7 @@ function SlotsPage() {
               </span>
               <button
                 onClick={() => navigate(1)}
-                className="text-neutral-400 hover:text-white p-1.5 rounded-full hover:bg-neutral-800 transition-colors rotate-180"
+                className="text-neutral-400 hover:text-white p-3 rounded-xl hover:bg-neutral-800 active:bg-neutral-700 transition-colors rotate-180"
                 title="Next day"
               >
                 <IoIosArrowBack size={20} />
@@ -372,7 +372,7 @@ function SlotsPage() {
             {!isToday && (
               <button
                 onClick={() => setCurrDate(new Date())}
-                className="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+                className="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 active:bg-neutral-700 text-neutral-400 hover:text-neutral-200 rounded-xl px-5 py-3 text-sm font-medium transition-colors"
               >
                 Today
               </button>
@@ -382,14 +382,14 @@ function SlotsPage() {
             <div className="relative" ref={calendarRef}>
               <button
                 onClick={() => setCalendarOpen((v) => !v)}
-                className={`bg-neutral-900 border rounded-xl p-2.5 transition-colors ${
+                className={`bg-neutral-900 border rounded-xl p-3 transition-colors ${
                   calendarOpen
                     ? "border-neutral-600 text-neutral-200 bg-neutral-800"
                     : "border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
                 }`}
                 title="Pick a date"
               >
-                <FaCalendarAlt size={18} />
+                <FaCalendarAlt size={20} />
               </button>
               {calendarOpen && (
                 <MiniCalendar
@@ -405,7 +405,7 @@ function SlotsPage() {
             {/* Create slot */}
             <button
               onClick={() => setCreateModalOpen(true)}
-              className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-neutral-300 rounded-xl px-5 py-2.5 font-medium transition-colors"
+              className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 rounded-xl px-5 py-3 font-medium transition-colors"
             >
               <IoAdd size={20} />
               Create Slot
@@ -424,7 +424,7 @@ function SlotsPage() {
             <p className="text-xl font-medium">No slots for this day.</p>
             <button
               onClick={() => setCreateModalOpen(true)}
-              className="mt-2 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-xl px-5 py-2.5 text-sm font-medium transition-colors"
+              className="mt-2 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-xl px-5 py-2.5 font-medium transition-colors h-14 "
             >
               + Create one
             </button>
@@ -446,15 +446,18 @@ function SlotsPage() {
                   key={slot._id}
                   className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden"
                 >
-                  {/* ── Slot header ── */}
-                  <div className="p-5 flex items-start gap-6 group">
+                  {/* ── Slot header (clicking anywhere expands tasks) ── */}
+                  <div
+                    className="px-5 pt-5 pb-4 flex items-start gap-5 cursor-pointer select-none"
+                    onClick={() => toggleTasksExpand(slot._id)}
+                  >
                     {/* Time column */}
-                    <div className="flex flex-col items-center min-w-[80px] pt-0.5">
-                      <span className="text-neutral-300 font-semibold text-sm">
+                    <div className="flex flex-col items-center min-w-[86px] pt-0.5">
+                      <span className="text-neutral-300 font-semibold text-base">
                         {formatTime(slot.startTime)}
                       </span>
                       <div className="w-px h-4 bg-neutral-700 my-1" />
-                      <span className="text-neutral-500 text-xs">
+                      <span className="text-neutral-500 text-sm">
                         {formatTime(slot.endTime)}
                       </span>
                     </div>
@@ -464,83 +467,84 @@ function SlotsPage() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-neutral-200 font-semibold text-lg leading-tight">
+                      <h3 className="text-neutral-200 font-semibold text-xl leading-tight">
                         {slot.title}
                       </h3>
                       {slot.description && (
-                        <p className="text-neutral-500 text-sm mt-1 leading-relaxed">
+                        <p className="text-neutral-500 text-base mt-1 leading-relaxed">
                           {slot.description}
                         </p>
                       )}
 
-                      {/* Progress + task expand toggle */}
+                      {/* Progress bar + task count */}
                       <div className="flex items-center gap-3 mt-3">
                         {slot.totalTasks > 0 && (
                           <>
-                            <div className="w-32 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                            <div className="w-32 h-2 bg-neutral-800 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-neutral-500 rounded-full transition-all"
                                 style={{ width: `${progress}%` }}
                               />
                             </div>
-                            <span className="text-neutral-500 text-xs">
+                            <span className="text-neutral-500 text-sm">
                               {slot.completedTasks}/{slot.totalTasks} tasks
                             </span>
                           </>
                         )}
-                        <button
-                          onClick={() => toggleTasksExpand(slot._id)}
-                          className="ml-auto flex items-center gap-1 text-neutral-600 hover:text-neutral-400 text-xs transition-colors"
-                        >
+                        <span className="ml-auto flex items-center gap-1 text-neutral-600 text-sm">
                           {tasksExpanded ? (
-                            <IoChevronDown size={14} />
+                            <IoChevronDown size={16} />
                           ) : (
-                            <IoChevronForward size={14} />
+                            <IoChevronForward size={16} />
                           )}
-                          {slot.totalTasks} task
-                          {slot.totalTasks !== 1 ? "s" : ""}
-                        </button>
+                          {slot.totalTasks === 0
+                            ? "No tasks"
+                            : `${slot.totalTasks} task${slot.totalTasks !== 1 ? "s" : ""}`}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Slot actions */}
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
+                    {/* Slot actions — always visible, stop propagation so card click doesn't fire */}
+                    <div
+                      className="flex gap-1 flex-shrink-0 pt-0.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         title="Add Task"
                         onClick={() => {
                           setAddTaskSlot(slot);
                           setExpandedTasks((p) => new Set([...p, slot._id]));
                         }}
-                        className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        className="p-3 text-neutral-500 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                       >
-                        <IoAdd size={16} />
+                        <IoAdd size={20} />
                       </button>
                       <button
                         title="Edit Slot"
                         onClick={() => setEditTarget(slot)}
-                        className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        className="p-3 text-neutral-500 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                       >
-                        <IoPencil size={16} />
+                        <IoPencil size={18} />
                       </button>
                       <button
                         title="Delete Slot"
                         onClick={() => setDeleteSlotConfirm(slot)}
-                        className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors"
+                        className="p-3 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
                       >
-                        <IoTrash size={16} />
+                        <IoTrash size={18} />
                       </button>
                     </div>
                   </div>
 
                   {/* ── Task list (collapsible) ── */}
                   {tasksExpanded && (
-                    <div className="border-t border-neutral-800 px-5 py-3 bg-neutral-950/40">
+                    <div className="border-t border-neutral-800 px-5 py-4 bg-neutral-950/40">
                       {slot.tasks.length === 0 && (
-                        <p className="text-neutral-700 text-sm text-center py-2">
+                        <p className="text-neutral-600 text-base text-center py-3">
                           No tasks yet.{" "}
                           <button
                             onClick={() => setAddTaskSlot(slot)}
-                            className="underline hover:text-neutral-500"
+                            className="underline hover:text-neutral-400"
                           >
                             Add one
                           </button>
@@ -563,9 +567,9 @@ function SlotsPage() {
 
                       {/* Separator */}
                       {incomplete.length > 0 && complete.length > 0 && (
-                        <div className="flex items-center gap-2 my-2">
+                        <div className="flex items-center gap-2 my-3">
                           <div className="flex-1 h-px bg-neutral-800" />
-                          <span className="text-neutral-700 text-xs">
+                          <span className="text-neutral-600 text-sm">
                             Completed
                           </span>
                           <div className="flex-1 h-px bg-neutral-800" />
@@ -589,9 +593,9 @@ function SlotsPage() {
                       {/* Add task button at bottom */}
                       <button
                         onClick={() => setAddTaskSlot(slot)}
-                        className="mt-2 w-full flex items-center justify-center gap-1 text-neutral-700 hover:text-neutral-400 text-xs py-1.5 rounded-lg hover:bg-neutral-800/50 transition-colors"
+                        className="mt-3 w-full flex items-center justify-center gap-2 text-neutral-600 hover:text-neutral-300 text-base py-3 rounded-xl hover:bg-neutral-800/60 active:bg-neutral-800 transition-colors"
                       >
-                        <IoAdd size={14} /> Add Task
+                        <IoAdd size={18} /> Add Task
                       </button>
                     </div>
                   )}
@@ -717,23 +721,23 @@ function TaskRow({
     "bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-neutral-300 text-sm focus:outline-none focus:border-neutral-500 w-full";
 
   return (
-    <div className="flex items-start gap-3 py-2 group/task">
-      {/* Checkbox */}
+    <div className="flex items-center gap-4 py-2.5 group/task">
+      {/* Checkbox — large touch target */}
       <button
         onClick={onToggle}
-        className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded flex items-center justify-center border transition-colors ${
+        className={`flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center border-2 transition-colors ${
           task.isCompleted
             ? "bg-neutral-500 border-neutral-500"
-            : "border-neutral-600 hover:border-neutral-400"
+            : "border-neutral-600 hover:border-neutral-400 active:border-neutral-300"
         }`}
       >
-        {task.isCompleted && <IoCheckmark size={11} className="text-white" />}
+        {task.isCompleted && <IoCheckmark size={14} className="text-white" />}
       </button>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         {isEditing ? (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <input
               autoFocus
               className={inputBase}
@@ -756,13 +760,13 @@ function TaskRow({
             <div className="flex gap-2">
               <button
                 onClick={saveEditTask}
-                className="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1 rounded"
+                className="text-sm bg-neutral-800 hover:bg-neutral-700 active:bg-neutral-600 text-neutral-300 px-4 py-2 rounded-lg"
               >
                 Save
               </button>
               <button
                 onClick={() => setEditingTask(null)}
-                className="text-xs text-neutral-600 hover:text-neutral-400"
+                className="text-sm text-neutral-600 hover:text-neutral-400 px-2 py-2"
               >
                 Cancel
               </button>
@@ -771,7 +775,7 @@ function TaskRow({
         ) : (
           <>
             <span
-              className={`text-sm ${
+              className={`text-base ${
                 task.isCompleted
                   ? "line-through text-neutral-600"
                   : "text-neutral-300"
@@ -779,13 +783,13 @@ function TaskRow({
             >
               {task.titleSnapshot}
               {task.type === "TEXTBOOK" && (
-                <span className="ml-1.5 text-xs text-neutral-600 bg-neutral-800 px-1.5 py-0.5 rounded">
+                <span className="ml-2 text-xs text-neutral-600 bg-neutral-800 px-1.5 py-0.5 rounded">
                   textbook
                 </span>
               )}
             </span>
             {task.description && (
-              <p className="text-xs text-neutral-600 mt-0.5">
+              <p className="text-sm text-neutral-600 mt-0.5">
                 {task.description}
               </p>
             )}
@@ -793,9 +797,9 @@ function TaskRow({
         )}
       </div>
 
-      {/* Task actions */}
+      {/* Task actions — always visible on touch */}
       {!isEditing && (
-        <div className="flex gap-1 opacity-0 group-hover/task:opacity-100 transition-opacity flex-shrink-0">
+        <div className="flex gap-1 flex-shrink-0">
           <button
             onClick={() =>
               setEditingTask({
@@ -805,15 +809,15 @@ function TaskRow({
                 description: task.description,
               })
             }
-            className="p-1 text-neutral-600 hover:text-white hover:bg-neutral-800 rounded transition-colors"
+            className="p-2.5 text-neutral-600 hover:text-white hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
           >
-            <IoPencil size={12} />
+            <IoPencil size={18} />
           </button>
           <button
             onClick={onDelete}
-            className="p-1 text-neutral-600 hover:text-red-400 hover:bg-neutral-800 rounded transition-colors"
+            className="p-2.5 text-neutral-600 hover:text-red-400 hover:bg-neutral-800 active:bg-neutral-700 rounded-xl transition-colors"
           >
-            <IoTrash size={12} />
+            <IoTrash size={18} />
           </button>
         </div>
       )}
