@@ -663,12 +663,12 @@ function SlotsPage() {
         isOpen={toggleTopicConfirm !== null}
         onClose={() => {
           if (toggleTopicConfirm)
-            doToggleTask(
-              toggleTopicConfirm.slot,
-              toggleTopicConfirm.task,
-              false,
-            );
-          setToggleTopicConfirm(null);
+            // doToggleTask(
+            //   toggleTopicConfirm.slot,
+            //   toggleTopicConfirm.task,
+            //   false,
+            // );
+            setToggleTopicConfirm(null);
         }}
         onConfirm={() => {
           if (toggleTopicConfirm)
